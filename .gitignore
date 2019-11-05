@@ -1,0 +1,4 @@
+node_modules
+jasmine_standalone
+.env
+.eslintrc.js
