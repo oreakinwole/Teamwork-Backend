@@ -91,8 +91,12 @@ router.post('/signin', (req, res) => {
             data: {},
         });
     }
-    const token = jwt.sign({ firstName: currentUser.firstName, admin: currentUser.admin },
-        process.env.SECRET_KEY, { expiresIn: 240 });
+    const token = jwt.sign({
+        firstName: currentUser.firstName,
+        admin: currentUser.admin,
+        userId: currentUser.userId,
+    },
+    process.env.SECRET_KEY, { expiresIn: 240 });
     res.status(200).json({
         status: 'success',
         data: {
