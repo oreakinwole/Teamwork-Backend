@@ -57,7 +57,7 @@ class User {
         },
         // SECRET KEY can be gotten from the .env file where it is stored
         process.env.SECRET_KEY,
-        { expiresIn: 240 });
+        { expiresIn: 900 });
         return token;
     }
 }
@@ -88,15 +88,15 @@ router.post('/signin', (req, res) => {
     if (!currentUser) {
         res.status(401).json({
             status: 'user not found',
-            data: {},
         });
+        return;
     }
     const token = jwt.sign({
         firstName: currentUser.firstName,
         admin: currentUser.admin,
         userId: currentUser.userId,
     },
-    process.env.SECRET_KEY, { expiresIn: 240 });
+    process.env.SECRET_KEY, { expiresIn: 900 });
     res.status(200).json({
         status: 'success',
         data: {
