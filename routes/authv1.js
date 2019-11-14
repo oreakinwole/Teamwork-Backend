@@ -5,6 +5,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const authmd = require('../middleware/authmd');
+const adminCheck = require('../middleware/admin');
 
 const users = [{
     firstName: 'Ore',
@@ -35,7 +37,7 @@ const users = [{
 let lastId = 2;
 
 class User {
-    constructor(firstName, lastName, email, password, gender, jobRole, department, address, admin,
+    constructor(firstName, lastName, email, password, gender, jobRole, department, address, admin = false,
         userId) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -57,13 +59,20 @@ class User {
         },
         // SECRET KEY can be gotten from the .env file where it is stored
         process.env.SECRET_KEY,
-        { expiresIn: 900 });
+        { expiresIn: 7200 });
         return token;
     }
 }
 
+router.get('/users', (req, res) => {
+    res.status(200).json({
+        status: 'success',
+        data: users,
+    });
+});
+
 // Create New User Route
-router.post('/create-user', (req, res) => {
+router.post('/create-user', [authmd, adminCheck], (req, res) => {
     const newUser = new User(req.body.firstName, req.body.lastName, req.body.email,
         req.body.password, req.body.gender, req.body.jobRole, req.body.department,
         req.body.address, req.body.admin, lastId + 1);
@@ -77,7 +86,6 @@ router.post('/create-user', (req, res) => {
             message: 'User account successfully created',
             token,
             userId: newUser.userId,
-            allusers: users,
         },
     });
 });
@@ -87,7 +95,8 @@ router.post('/signin', (req, res) => {
     const currentUser = users.find((user) => user.email === req.body.email);
     if (!currentUser) {
         res.status(401).json({
-            status: 'user not found',
+            status: 'error',
+            error: 'user not found',
         });
         return;
     }
@@ -96,13 +105,12 @@ router.post('/signin', (req, res) => {
         admin: currentUser.admin,
         userId: currentUser.userId,
     },
-    process.env.SECRET_KEY, { expiresIn: 900 });
+    process.env.SECRET_KEY, { expiresIn: 7200 });
     res.status(200).json({
         status: 'success',
         data: {
             token,
             userId: currentUser.userId,
-            allusers: users,
         },
     });
 });

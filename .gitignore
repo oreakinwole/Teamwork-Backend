@@ -1,4 +1,5 @@
 node_modules
 jasmine_standalone
+images
 .env
 .eslintrc.js
