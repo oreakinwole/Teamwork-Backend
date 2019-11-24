@@ -12,7 +12,7 @@ const adminCheck = require('../middleware/admin');
 
 // User Sign in Route
 router.post('/signin', async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     const queryEmail = 'SELECT * FROM users where email = $1';
@@ -65,7 +65,7 @@ router.post('/signin', async (req, res) => {
 
 // Create New User Route
 router.post('/create-user', [authmd, adminCheck], async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     // hash the admin password in our environment variable, to be used for the admin user in our database

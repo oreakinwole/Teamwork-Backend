@@ -5,7 +5,7 @@ const router = express.Router();
 const authmd = require('../middleware/authmd');
 
 router.get('/feed', authmd, async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     client.query('Select * FROM articles')
@@ -24,7 +24,7 @@ router.get('/feed', authmd, async (req, res) => {
 });
 
 router.get('/:id', authmd, async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -50,7 +50,7 @@ router.get('/:id', authmd, async (req, res) => {
 });
 
 router.post('/', authmd, async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     client.query('INSERT INTO articles(title, article, createdon) VALUES($1, $2, $3) RETURNING *', [req.body.title, req.body.article, new Date().toLocaleString()])
@@ -74,7 +74,7 @@ router.post('/', authmd, async (req, res) => {
 });
 
 router.put('/:id', authmd, async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -113,7 +113,7 @@ router.put('/:id', authmd, async (req, res) => {
 });
 
 router.delete('/:id', authmd, async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -150,7 +150,7 @@ router.delete('/:id', authmd, async (req, res) => {
 });
 
 router.post('/:id/comment', authmd, async (req, res) => {
-    const client = new Client();
+    const client = new Client({ ssl: true });
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
