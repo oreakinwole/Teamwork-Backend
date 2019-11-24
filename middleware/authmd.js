@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 module.exports = (req, res, next) => {
     const token = req.header('teamworkToken');
     if (!token) {
-        res.status(401).send('No Token provided.');
+        res.status(400).send('No Token provided.');
         return;
     }
     try {

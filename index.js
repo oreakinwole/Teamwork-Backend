@@ -4,6 +4,8 @@ const path = require('path');
 require('dotenv').config();
 const express = require('express');
 const cloudinary = require('cloudinary').v2;
+const startDb = require('./startup/startdb');
+
 const auth1 = require('./routes/authv1');
 const gifs1 = require('./routes/gifs');
 const articles1 = require('./routes/articles');
@@ -15,6 +17,8 @@ if (!process.env.SECRET_KEY) {
 } else {
     console.info('Found SECRET KEY');
 }
+
+startDb();
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,

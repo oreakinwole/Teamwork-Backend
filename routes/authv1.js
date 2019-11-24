@@ -1,118 +1,99 @@
 /* eslint-disable no-console */
 /* eslint-disable import/no-extraneous-dependencies */
 const express = require('express');
+const { Client } = require('pg');
 
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 const authmd = require('../middleware/authmd');
 const adminCheck = require('../middleware/admin');
 
-const users = [{
-    firstName: 'Ore',
-    lastName: 'Akinwole',
-    email: 'oreakinwole@gmail.com',
-    password: 'smart',
-    gender: 'male',
-    jobRole: 'backend developer',
-    department: 'software',
-    address: '14 sobo arobiodu',
-    admin: true,
-    userId: 1,
-},
-{
-    firstName: 'Toyosi',
-    lastName: 'Shode',
-    email: 'toyosi@gmail.com',
-    password: 'toyosi',
-    gender: 'male',
-    jobRole: 'frontend developer',
-    department: 'software',
-    address: '15 Fagba road',
-    admin: false,
-    userId: 2,
-},
+// User Sign in Route
+router.post('/signin', async (req, res) => {
+    const client = new Client();
+    await client.connect();
 
-];
-let lastId = 2;
+    const queryEmail = 'SELECT * FROM users where email = $1';
+    const value = [req.body.email];
 
-class User {
-    constructor(firstName, lastName, email, password, gender, jobRole, department, address, admin = false,
-        userId) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.gender = gender;
-        this.jobRole = jobRole;
-        this.department = department;
-        this.address = address;
-        this.admin = admin;
-        this.userId = userId;
-    }
+    // Check for the user with the email address
+    client.query(queryEmail, value)
+        .then((result) => {
+            if (result.rowCount === 0) {
+                res.status(400).json({
+                    status: 'error',
+                    error: 'Invalid email or password',
+                });
+                return;
+            }
 
-    generateUserAuthToken() {
-        const token = jwt.sign({
-            firstName: this.firstName,
-            admin: this.admin,
-            userId: this.userId,
-        },
-        // SECRET KEY can be gotten from the .env file where it is stored
-        process.env.SECRET_KEY,
-        { expiresIn: 7200 });
-        return token;
-    }
-}
-
-router.get('/users', (req, res) => {
-    res.status(200).json({
-        status: 'success',
-        data: users,
-    });
+            // Check if the password is valid
+            bcrypt.compare(req.body.password, result.rows[0].password)
+                .then((validPassword) => {
+                    if (!validPassword) {
+                        res.status(400).json({
+                            status: 'error',
+                            error: 'Invalid email or password',
+                        });
+                    } else {
+                        // Generate Jwt Token
+                        const token = jwt.sign({
+                            userId: result.rows[0].userid,
+                            firstName: result.rows[0].firstname,
+                            admin: result.rows[0].admin,
+                        },
+                        process.env.SECRET_KEY, { expiresIn: 7200 });
+                        res.status(200).json({
+                            status: 'success',
+                            data: {
+                                token,
+                                userId: result.rows[0].userid,
+                            },
+                        });
+                    }
+                })
+                .catch((error) => {
+                    res.status(500).json({ status: 'error', error });
+                });
+        })
+        .catch((error) => {
+            res.status(500).json({ status: 'error', error });
+        });
 });
 
 // Create New User Route
-router.post('/create-user', [authmd, adminCheck], (req, res) => {
-    const newUser = new User(req.body.firstName, req.body.lastName, req.body.email,
-        req.body.password, req.body.gender, req.body.jobRole, req.body.department,
-        req.body.address, req.body.admin, lastId + 1);
-    lastId += 1;
-    users.push(newUser);
+router.post('/create-user', [authmd, adminCheck], async (req, res) => {
+    const client = new Client();
+    await client.connect();
 
-    const token = newUser.generateUserAuthToken();
-    res.status(201).json({
-        status: 'success',
-        data: {
-            message: 'User account successfully created',
-            token,
-            userId: newUser.userId,
-        },
-    });
-});
+    // hash the admin password in our environment variable, to be used for the admin user in our database
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-// User Sign in Route
-router.post('/signin', (req, res) => {
-    const currentUser = users.find((user) => user.email === req.body.email);
-    if (!currentUser) {
-        res.status(401).json({
-            status: 'error',
-            error: 'user not found',
-        });
-        return;
-    }
-    const token = jwt.sign({
-        firstName: currentUser.firstName,
-        admin: currentUser.admin,
-        userId: currentUser.userId,
-    },
-    process.env.SECRET_KEY, { expiresIn: 7200 });
-    res.status(200).json({
-        status: 'success',
-        data: {
-            token,
-            userId: currentUser.userId,
-        },
-    });
+    // insert Admin User
+    const text = 'INSERT INTO users(firstname, lastname, email, password, gender, jobrole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *';
+    const values = [req.body.firstname, req.body.lastname, req.body.email, hashedPassword, req.body.gender, req.body.jobrole, req.body.department, req.body.address];
+
+    client.query(text, values)
+        .then((result) => {
+            const token = jwt.sign({
+                userId: req.body.userid,
+                firstName: req.body.firstname,
+                admin: req.body.admin || false,
+            },
+            process.env.SECRET_KEY, { expiresIn: 7200 });
+            res.status(201).json({
+                status: 'success',
+                data: {
+                    message: 'User account successfully created',
+                    token,
+                    userId: result.rows[0].userid,
+                },
+            });
+        })
+        .catch((err) => res.status(500).json({ status: 'error', err }));
 });
 
 module.exports = router;
