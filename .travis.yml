@@ -3,15 +3,19 @@ node_js:
   - "stable"
 cache:
   directories:
-    - "node_modules"
+  - "node_modules"
+services:
+  - postgresql
+addons:
+  postgresql: "10.6"
 env:
-    - SECRET_KEY = teamwork_secretkey
-    - CLOUDINARY_NAME = taydrey
-    - CLOUDINARY_KEY = 582884518544818
-    - CLOUDINARY_SECRET = IPqm18gsHPBF9oz0Nrzufe20-2c
-    - PGHOST='localhost'
-    - PGUSER=postgres
-    - PGDATABASE=teamwork-test
-    - PGPASSWORD=smart007=
-    - PGPORT=5432
-    - ADMINPASSWORD=teamworkAdmin
+  - SECRET_KEY = teamwork_secretkey
+  - CLOUDINARY_NAME = taydrey
+  - CLOUDINARY_KEY = 582884518544818
+  - CLOUDINARY_SECRET = IPqm18gsHPBF9oz0Nrzufe20-2c
+  - PGHOST='localhost'
+  - PGUSER=postgres
+  - PGDATABASE=teamwork-test
+  - PGPASSWORD=smart007=
+  - PGPORT=5432
+  - ADMINPASSWORD=teamworkAdmin
