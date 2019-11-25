@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-// require('dotenv').config();
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {

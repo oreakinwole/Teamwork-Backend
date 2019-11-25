@@ -8,7 +8,7 @@ const authmd = require('../middleware/authmd');
 const multer = require('../middleware/multer-config');
 
 router.get('/feed', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM gifs')
@@ -27,7 +27,7 @@ router.get('/feed', authmd, async (req, res) => {
 });
 
 router.get('/:id', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM gifs WHERE gifid = $1', [parseInt(req.params.id, 10)])
@@ -63,7 +63,7 @@ router.post('/', [authmd, multer], async (req, res) => {
     cloudinary.uploader.upload(`images/${req.file.filename}`, async (error, result) => {
         if (error) res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
         if (result) {
-            const client = new Client({ ssl: true });
+            const client = new Client();
             await client.connect();
 
             client.query('INSERT INTO gifs(title, imageurl, createdon) VALUES($1, $2, $3) RETURNING *', [result.original_filename, result.url, new Date().toLocaleString()])
@@ -90,7 +90,7 @@ router.post('/', [authmd, multer], async (req, res) => {
 });
 
 router.delete('/:id', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM gifs WHERE gifid = $1', [parseInt(req.params.id, 10)])
@@ -129,7 +129,7 @@ router.delete('/:id', authmd, async (req, res) => {
 });
 
 router.post('/:id/comment', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM gifs WHERE gifid = $1', [parseInt(req.params.id, 10)])

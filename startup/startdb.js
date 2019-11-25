@@ -3,7 +3,7 @@ const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 
 module.exports = async () => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
     try {
         // Check if theres a users table present

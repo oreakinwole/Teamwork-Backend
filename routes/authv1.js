@@ -6,13 +6,13 @@ const { Client } = require('pg');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-// require('dotenv').config();
+require('dotenv').config();
 const authmd = require('../middleware/authmd');
 const adminCheck = require('../middleware/admin');
 
 // User Sign in Route
 router.post('/signin', async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     const queryEmail = 'SELECT * FROM users where email = $1';
@@ -65,7 +65,7 @@ router.post('/signin', async (req, res) => {
 
 // Create New User Route
 router.post('/create-user', [authmd, adminCheck], async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     // hash the admin password in our environment variable, to be used for the admin user in our database
