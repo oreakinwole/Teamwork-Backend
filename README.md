@@ -17,3 +17,5 @@ PGPASSWORD= ( password )
 PGPORT=5432
 
 ADMINPASSWORD=teamworkAdmin
+
+Before running mocha, to test. Please makes sure you run "npm start" once, this allows the app create the tables needed. After that, terminate the process. Then you can run npm test
