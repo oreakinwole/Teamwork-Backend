@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 const path = require('path');
-require('dotenv').config();
+// require('dotenv').config();
 const express = require('express');
 const cloudinary = require('cloudinary').v2;
 const startDb = require('./startup/startdb');

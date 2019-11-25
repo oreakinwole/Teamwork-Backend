@@ -6,7 +6,7 @@ const { Client } = require('pg');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-require('dotenv').config();
+// require('dotenv').config();
 const authmd = require('../middleware/authmd');
 const adminCheck = require('../middleware/admin');
 
