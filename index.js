@@ -9,6 +9,7 @@ const startDb = require('./startup/startdb');
 const auth1 = require('./routes/authv1');
 const gifs1 = require('./routes/gifs');
 const articles1 = require('./routes/articles');
+const home = require('./routes/home');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(express.json());
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 // Api Routes
+app.use('/', home)
 app.use('/api/v1/auth', auth1);
 app.use('/api/v1/gifs', gifs1);
 app.use('/api/v1/articles', articles1);
