@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { Client } = require('pg');
+// const { Client } = require('pg');
 
 router.get('/', async (req, res) => {
     /* const client = new Client();
