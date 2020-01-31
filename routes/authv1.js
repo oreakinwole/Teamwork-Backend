@@ -68,7 +68,7 @@ router.post('/create-user', [authmd, adminCheck], async (req, res) => {
     const client = new Client();
     await client.connect();
 
-    // hash the admin password in our environment variable, to be used for the admin user in our database
+    // hash the password in the request body
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 

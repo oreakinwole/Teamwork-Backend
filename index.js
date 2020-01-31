@@ -1,6 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
-const path = require('path');
 require('dotenv').config();
 const express = require('express');
 const cloudinary = require('cloudinary').v2;
@@ -36,7 +35,6 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
 // Api Routes
 app.use('/', home);
 app.use('/api/v1/auth', auth1);

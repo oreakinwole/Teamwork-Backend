@@ -161,13 +161,16 @@ router.post('/:id/comment', authmd, async (req, res) => {
                     error: 'Article with the given id not found',
                 });
             } else {
+                // get the length of the comment array in the article db as commentlength
                 const queryT = 'select array_length(comments, 1) as commentlength from articles where articleid = $1';
                 const valueT = [req.params.id];
 
                 client.query(queryT, valueT)
                     .then((dataT) => {
+                        // make the commentlength value a string
                         let arrayLength = JSON.stringify(dataT.rows[0].commentlength);
                         if (arrayLength === 'null' || arrayLength === 'NULL' || arrayLength === 'Null') arrayLength = 0;
+                        // convert to number value
                         arrayLength = parseInt(arrayLength, 10);
                         // to get the domain of the user, to be used for authorid
                         const hostName = req.get('host');

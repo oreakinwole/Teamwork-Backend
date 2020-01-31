@@ -5,7 +5,10 @@ const cloudinary = require('cloudinary').v2;
 
 const router = express.Router();
 const authmd = require('../middleware/authmd');
-const multer = require('../middleware/multer-config');
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart();
+
+const isMyObjectEmpty = require('../utility/index');
 
 router.get('/feed', authmd, async (req, res) => {
     const client = new Client();
@@ -52,21 +55,40 @@ router.get('/:id', authmd, async (req, res) => {
         });
 });
 
-router.post('/', [authmd, multer], async (req, res) => {
-    if (!req.file || req.file.filename.split('.')[1] !== 'gif') {
+router.post('/', multipartMiddleware, (req, res) => {
+    // to be used later on, will be called when problem occurs in storing gif in database
+    const deleteImageFromCloudinary = (imageName, err) => {
+        cloudinary.uploader.destroy(imageName, { invalidate: true, resource_type: 'image' }, (error, result) => {
+            if (error) return res.status(400).json({
+                status: 'error',
+                error: `Error deleting file from cloudinary and error while trying to store image in database, ${error}`
+              });
+              return res.status(500).json({
+                status: 'error',
+                error: `Internal error while trying to store image in database, ${err}`
+            });
+          }
+        );
+      }
+      
+    const file = req.files.image.path;
+
+    if (isMyObjectEmpty(req.files) === true || req.files.image.type.split('/')[1] !== 'gif') {
         res.status(400).json({
             status: 'error',
             error: 'must select a gif image to upload',
         });
+        return;
     }
+    
 
-    cloudinary.uploader.upload(`images/${req.file.filename}`, async (error, result) => {
-        if (error) res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
+    cloudinary.uploader.upload(file, async (error, result) => {
+        if (error) return res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
         if (result) {
             const client = new Client();
             await client.connect();
 
-            client.query('INSERT INTO gifs(title, imageurl, createdon) VALUES($1, $2, $3) RETURNING *', [result.original_filename, result.url, new Date().toLocaleString()])
+            client.query('INSERT INTO gifs(title, imageurl, createdon) VALUES($1, $2, $3) RETURNING *', [req.body.title, result.url, new Date().toLocaleString()])
                 .then((data) => {
                     res.status(201).json({
                         status: 'success',
@@ -79,12 +101,7 @@ router.post('/', [authmd, multer], async (req, res) => {
                         },
                     });
                 })
-                .catch((err) => {
-                    res.status(500).json({
-                        status: 'error',
-                        error: `Internal error while trying to post article, ${err}`,
-                    });
-                });
+                .catch(err => deleteImageFromCloudinary(result.public_id, err));
         }
     });
 });
