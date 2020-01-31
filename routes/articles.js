@@ -5,7 +5,7 @@ const router = express.Router();
 const authmd = require('../middleware/authmd');
 
 router.get('/feed', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM articles')
@@ -24,7 +24,7 @@ router.get('/feed', authmd, async (req, res) => {
 });
 
 router.get('/:id', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -50,7 +50,7 @@ router.get('/:id', authmd, async (req, res) => {
 });
 
 router.post('/', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('INSERT INTO articles(title, article, createdon) VALUES($1, $2, $3) RETURNING *', [req.body.title, req.body.article, new Date().toLocaleString()])
@@ -74,7 +74,7 @@ router.post('/', authmd, async (req, res) => {
 });
 
 router.put('/:id', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -113,7 +113,7 @@ router.put('/:id', authmd, async (req, res) => {
 });
 
 router.delete('/:id', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -150,7 +150,7 @@ router.delete('/:id', authmd, async (req, res) => {
 });
 
 router.post('/:id/comment', authmd, async (req, res) => {
-    const client = new Client({ ssl: true });
+    const client = new Client();
     await client.connect();
 
     client.query('Select * FROM articles WHERE articleid = $1', [parseInt(req.params.id, 10)])
@@ -161,13 +161,16 @@ router.post('/:id/comment', authmd, async (req, res) => {
                     error: 'Article with the given id not found',
                 });
             } else {
+                // get the length of the comment array in the article db as commentlength
                 const queryT = 'select array_length(comments, 1) as commentlength from articles where articleid = $1';
                 const valueT = [req.params.id];
 
                 client.query(queryT, valueT)
                     .then((dataT) => {
+                        // make the commentlength value a string
                         let arrayLength = JSON.stringify(dataT.rows[0].commentlength);
                         if (arrayLength === 'null' || arrayLength === 'NULL' || arrayLength === 'Null') arrayLength = 0;
+                        // convert to number value
                         arrayLength = parseInt(arrayLength, 10);
                         // to get the domain of the user, to be used for authorid
                         const hostName = req.get('host');
