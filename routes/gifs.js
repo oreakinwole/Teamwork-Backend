@@ -57,7 +57,7 @@ router.get('/:id', authmd, async (req, res) => {
 
 router.post('/', multipartMiddleware, (req, res) => {
     // to be used later on, will be called when problem occurs in storing gif in database
-    const deleteImageFromCloudinary = (imageName, err) => {
+   /*  const deleteImageFromCloudinary = (imageName, err) => {
         cloudinary.uploader.destroy(imageName, { invalidate: true, resource_type: 'image' }, (error, result) => {
             if (error) return res.status(400).json({
                 status: 'error',
@@ -69,11 +69,12 @@ router.post('/', multipartMiddleware, (req, res) => {
             });
           }
         );
-      }
+      } */
       
     const file = req.files.image.path;
+    console.log(file);
 
-    if (isMyObjectEmpty(req.files) === true || req.files.image.type.split('/')[1] !== 'gif') {
+    /* if (isMyObjectEmpty(req.files) === true || req.files.image.type.split('/')[1] !== 'gif') {
         res.status(400).json({
             status: 'error',
             error: 'must select a gif image to upload',
@@ -103,7 +104,7 @@ router.post('/', multipartMiddleware, (req, res) => {
                 })
                 .catch(err => deleteImageFromCloudinary(result.public_id, err));
         }
-    });
+    }); */
 });
 
 router.delete('/:id', authmd, async (req, res) => {
@@ -118,7 +119,6 @@ router.delete('/:id', authmd, async (req, res) => {
                     error: 'Gif with the given id not found',
                 });
             } else {
-                fs.unlink(`images/${data.rows[0].title}.gif`, () => {
                     client.query('DELETE FROM gifs WHERE gifid = $1', [parseInt(req.params.id, 10)])
                         .then(() => {
                             res.status(200).json({
@@ -134,7 +134,6 @@ router.delete('/:id', authmd, async (req, res) => {
                                 error: `Internal error while trying to delete gif, ${error}`,
                             });
                         });
-                });
             }
         })
         .catch((err) => {
