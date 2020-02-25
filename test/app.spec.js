@@ -1,6 +1,7 @@
 const request = require('supertest');
 const { expect } = require('chai');
 const app = require('../index');
+const fs = require('fs');
 
 /* Auth route */
 describe('Auth route', () => {
