@@ -85,7 +85,7 @@ router.post('/', multipartMiddleware, (req, res) => {
 
 
     cloudinary.uploader.upload(file, async (error, result) => {
-        if (error) return res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
+        if (error) res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
         if (result) {
             const client = new Client();
             await client.connect();
