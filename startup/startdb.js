@@ -11,7 +11,7 @@ module.exports = async () => {
         const queryValue = ['users'];
         const usersDb = await client.query(query, queryValue);
 
-        // hash the admin password in our environment variable, to be used for the admin user in our database
+        // hash the admin password in our env variable, to be used for the admin user in our DB
         const salt = await bcrypt.genSalt(10);
         const adminPassword = await bcrypt.hash(process.env.ADMINPASSWORD, salt);
 
@@ -51,6 +51,6 @@ module.exports = async () => {
             await client.end();
         }
     } catch (error) {
-        console.log('Something failed with checking if Table exists');
+        console.log('Something failed while checking if Table exists');
     }
 };
