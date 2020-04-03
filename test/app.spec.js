@@ -417,7 +417,7 @@ describe('Gifs route', () => {
             const res = await request(app)
                 .post('/api/v1/gifs')
                 .field('title', newTitle)
-                .attach('image', 'test/imgupload/gbeng_bth.gif')
+                .attach('image', 'test/imgupload/msanni.gif')
                 .set('teamworkToken', token);
             expect(res.status).to.equal(201);
         });
