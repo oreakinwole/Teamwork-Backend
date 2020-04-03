@@ -39,9 +39,10 @@ module.exports = async () => {
                 .then(() => console.log('Done Creating Gif Table'))
                 .catch(() => console.log('Something failed while Creating gif table'));
         } else {
+            // check if an admin user is present in users table
             const adminUser = await client.query('SELECT * FROM users where admin = true');
+            // if no admin user, insert one
             if (adminUser.rowCount === 0) {
-                // insert Admin User
                 const text = 'INSERT INTO users(firstname, lastname, email, password, gender, jobrole, department, address, admin) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)';
                 const values = ['Ore', 'Akinwole', 'toyosi@gmail.com', adminPassword, 'male', 'backend', 'software', '14, Sobo arobiodu street, G.R.A, Ikeja', true];
                 client.query(text, values)
