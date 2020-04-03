@@ -59,7 +59,7 @@ router.get('/:id', authmd, async (req, res) => {
 router.post('/', multipartMiddleware, (req, res) => {
     // to be used later on, will be called when problem occurs in storing gif in database
     const deleteImageFromCloudinary = (imageName, err) => {
-        cloudinary.uploader.destroy(imageName, { invalidate: true, resource_type: 'image' }, (error, result) => {
+        cloudinary.uploader.destroy(imageName, { invalidate: true, resource_type: 'image' }, (error) => {
             if (error) {
                 return res.status(400).json({
                     status: 'error',
