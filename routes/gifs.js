@@ -4,8 +4,9 @@ const { Client } = require('pg');
 const cloudinary = require('cloudinary').v2;
 
 const router = express.Router();
-const authmd = require('../middleware/authmd');
 const multipart = require('connect-multiparty');
+const authmd = require('../middleware/authmd');
+
 const multipartMiddleware = multipart();
 
 const isMyObjectEmpty = require('../utility/index');
@@ -57,7 +58,7 @@ router.get('/:id', authmd, async (req, res) => {
 
 router.post('/', multipartMiddleware, (req, res) => {
     // to be used later on, will be called when problem occurs in storing gif in database
-   /*  const deleteImageFromCloudinary = (imageName, err) => {
+    /*  const deleteImageFromCloudinary = (imageName, err) => {
         cloudinary.uploader.destroy(imageName, { invalidate: true, resource_type: 'image' }, (error, result) => {
             if (error) return res.status(400).json({
                 status: 'error',
@@ -70,7 +71,7 @@ router.post('/', multipartMiddleware, (req, res) => {
           }
         );
       } */
-      
+
     const file = req.files.image.path;
     console.log(file);
 
@@ -81,7 +82,7 @@ router.post('/', multipartMiddleware, (req, res) => {
         });
         return;
     }
-    
+
 
     cloudinary.uploader.upload(file, async (error, result) => {
         if (error) return res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
@@ -119,21 +120,21 @@ router.delete('/:id', authmd, async (req, res) => {
                     error: 'Gif with the given id not found',
                 });
             } else {
-                    client.query('DELETE FROM gifs WHERE gifid = $1', [parseInt(req.params.id, 10)])
-                        .then(() => {
-                            res.status(200).json({
-                                status: 'success',
-                                data: {
-                                    message: 'gif post successfully deleted',
-                                },
-                            });
-                        })
-                        .catch((error) => {
-                            res.status(500).json({
-                                status: 'error',
-                                error: `Internal error while trying to delete gif, ${error}`,
-                            });
+                client.query('DELETE FROM gifs WHERE gifid = $1', [parseInt(req.params.id, 10)])
+                    .then(() => {
+                        res.status(200).json({
+                            status: 'success',
+                            data: {
+                                message: 'gif post successfully deleted',
+                            },
                         });
+                    })
+                    .catch((error) => {
+                        res.status(500).json({
+                            status: 'error',
+                            error: `Internal error while trying to delete gif, ${error}`,
+                        });
+                    });
             }
         })
         .catch((err) => {
