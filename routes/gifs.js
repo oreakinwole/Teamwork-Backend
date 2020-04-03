@@ -4,8 +4,9 @@ const { Client } = require('pg');
 const cloudinary = require('cloudinary').v2;
 
 const router = express.Router();
-const authmd = require('../middleware/authmd');
 const multipart = require('connect-multiparty');
+const authmd = require('../middleware/authmd');
+
 const multipartMiddleware = multipart();
 
 const isMyObjectEmpty = require('../utility/index');
@@ -59,18 +60,19 @@ router.post('/', multipartMiddleware, (req, res) => {
     // to be used later on, will be called when problem occurs in storing gif in database
     const deleteImageFromCloudinary = (imageName, err) => {
         cloudinary.uploader.destroy(imageName, { invalidate: true, resource_type: 'image' }, (error, result) => {
-            if (error) return res.status(400).json({
+            if (error) {
+                return res.status(400).json({
+                    status: 'error',
+                    error: `Error deleting file from cloudinary and error while trying to store image in database, ${error}`,
+                });
+            }
+            return res.status(500).json({
                 status: 'error',
-                error: `Error deleting file from cloudinary and error while trying to store image in database, ${error}`
-              });
-              return res.status(500).json({
-                status: 'error',
-                error: `Internal error while trying to store image in database, ${err}`
+                error: `Internal error while trying to store image in database, ${err}`,
             });
-          }
-        );
-      }
-      
+        });
+    };
+
     const file = req.files.image.path;
 
     if (isMyObjectEmpty(req.files) === true || req.files.image.type.split('/')[1] !== 'gif') {
@@ -80,7 +82,7 @@ router.post('/', multipartMiddleware, (req, res) => {
         });
         return;
     }
-    
+
 
     cloudinary.uploader.upload(file, async (error, result) => {
         if (error) return res.status(400).json({ status: 'error', error: `Bad request or Something failed, ${error}` });
@@ -101,7 +103,7 @@ router.post('/', multipartMiddleware, (req, res) => {
                         },
                     });
                 })
-                .catch(err => deleteImageFromCloudinary(result.public_id, err));
+                .catch((err) => deleteImageFromCloudinary(result.public_id, err));
         }
     });
 });
