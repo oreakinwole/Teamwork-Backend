@@ -73,8 +73,6 @@ router.post('/', multipartMiddleware, (req, res) => {
         });
     };
 
-    const file = req.files.image.path;
-
     if (isMyObjectEmpty(req.files) === true || req.files.image.type.split('/')[1] !== 'gif') {
         res.status(400).json({
             status: 'error',
@@ -82,6 +80,8 @@ router.post('/', multipartMiddleware, (req, res) => {
         });
         return;
     }
+
+    const file = req.files.image.path;
 
 
     cloudinary.uploader.upload(file, async (error, result) => {
