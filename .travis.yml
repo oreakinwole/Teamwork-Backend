@@ -4,8 +4,8 @@ node_js:
 cache:
   directories:
   - "node_modules"
-addons:
-  postgresql: "10.6"
+services:
+  - postgresql
 env:
   - SECRET_KEY = teamwork_secretkey
   - CLOUDINARY_NAME = taydrey
