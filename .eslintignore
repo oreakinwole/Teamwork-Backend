@@ -1,5 +1,0 @@
-/build/**
-/coverage/**
-/test/**
-
-# Add any other files or folders that you want eslint to ignore
