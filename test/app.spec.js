@@ -1,13 +1,21 @@
 const request = require('supertest');
 const { expect } = require('chai');
+const { Client } = require('pg');
 const app = require('../index');
+const { getRandomString } = require('../utility/index');
+const startDB = require('../startup/startdb');
+
+
+const getRandomEmail = (length) => `${getRandomString(length).toLowerCase()}@gmail.com`;
+
+before(async() => { await startDB() });
 
 /* Auth route */
 describe('Auth route', () => {
     describe('POST /api/v1/auth/signin', () => {
         it('should return 400 if email does not exist', async () => {
-            const email = 'hal@gmail.com';
-            const password = 'boshenlo';
+            const email = getRandomEmail(9);
+            const password = 'randomPWord';
 
             const res = await request(app)
                 .post('/api/v1/auth/signin')
@@ -20,7 +28,7 @@ describe('Auth route', () => {
 
         it('should return 400 if password is wrong', async () => {
             const email = 'oreakinwole@gmail.com';
-            const password = 'boshenlo';
+            const password = 'notAdminPWord';
 
             const res = await request(app)
                 .post('/api/v1/auth/signin')
@@ -33,7 +41,7 @@ describe('Auth route', () => {
 
         it('should return 200 if both email and password are valid', async () => {
             const email = 'oreakinwole@gmail.com';
-            const password = 'teamworkAdmin';
+            const password = process.env.ADMINPASSWORD;
 
             const res = await request(app)
                 .post('/api/v1/auth/signin')
@@ -49,13 +57,13 @@ describe('Auth route', () => {
         it('should return with a 400 error, for not providing a token', async () => {
             // create new user properties and value
             const firstname = 'Segun';
-            const lastname = 'Aiyedogbon';
-            const email = 'segunaiye@ymail.com';
-            const password = 'segfbdfbg3';
+            const lastname = 'Electrician';
+            const email = getRandomEmail(9);
+            const password = 'randomPWord';
             const gender = 'Male';
-            const jobrole = 'gbe bodyer';
-            const department = 'dance';
-            const address = 'Sango Ota';
+            const jobrole = 'Electrician';
+            const department = 'Power';
+            const address = 'Idumota';
 
             // Send the request
             const res = await request(app)
@@ -76,7 +84,7 @@ describe('Auth route', () => {
         it('should create a new user when admin token is provided', async () => {
             // Signin with admin account in order to get a token to create user
             let email = 'oreakinwole@gmail.com';
-            let password = 'teamworkAdmin';
+            let password = process.env.ADMINPASSWORD;
 
             let res = await request(app)
                 .post('/api/v1/auth/signin')
@@ -88,13 +96,13 @@ describe('Auth route', () => {
 
             // create new user properties and value
             const firstname = 'Segun';
-            const lastname = 'Aiyedogbon';
+            const lastname = 'Bouncer';
             email = 'segunaiye@yahoo.com';
             password = 'segun123';
             const gender = 'Male';
-            const jobrole = 'gbe bodyer';
-            const department = 'dance';
-            const address = 'Sango Ota';
+            const jobrole = 'Bouncer';
+            const department = 'Security';
+            const address = 'Allen Avenue';
 
             // Send the request
             res = await request(app)
@@ -114,7 +122,7 @@ describe('Auth route', () => {
         });
 
         it('should return with 403 error when token provided is not an admin token', async () => {
-            // Signin with admin account in order to get a token to create user
+            // Signin with normal account in order to get a token which is not Admin token
             let email = 'segunaiye@yahoo.com';
             let password = 'segun123';
 
@@ -129,11 +137,11 @@ describe('Auth route', () => {
             // create new user properties and value
             const firstname = 'Gbolahan';
             const lastname = 'Aniyeloye';
-            email = 'gbolahanani@yahoo.com';
-            password = 'gbolylomo';
+            email = getRandomEmail(9);
+            password = 'randomPWord';
             const gender = 'Male';
-            const jobrole = 'Shaku shaku dancer';
-            const department = 'dance';
+            const jobrole = 'Dancer';
+            const department = 'Dance';
             const address = 'Ilupeju';
 
             // Send the request
@@ -376,7 +384,7 @@ describe('Articles route', () => {
 });
 
 
-describe('Gifs route', () => {
+/* describe('Gifs route', () => {
     describe('GET /api/v1/gifs/feed/', () => {
         it('should return 200 status code', async () => {
             const email = 'segunaiye@yahoo.com';
@@ -542,4 +550,14 @@ describe('Gifs route', () => {
             expect(res.status).to.equal(200);
         });
     });
+}); */
+
+after(async() => {
+    const client = new Client();
+    await client.connect();
+
+    client.query('drop table articles, gifs, users')
+        .then(() => console.log('done post test tables delete'))
+        .catch((err) => console.log('Error occured while doing post test tables delete', err));
+
 });

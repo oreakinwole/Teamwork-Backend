@@ -19,3 +19,5 @@ env:
   - PGPASSWORD=smart007=
   - PGPORT=5432
   - ADMINPASSWORD=teamworkAdmin
+install:
+  - npm install

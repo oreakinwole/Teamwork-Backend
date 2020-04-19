@@ -20,7 +20,7 @@ module.exports = async () => {
 
                 const createUserTable = 'CREATE TABLE Users(userid SMALLSERIAL PRIMARY KEY, firstname varchar (50) not null, lastname varchar (50) not null, email varchar (50) UNIQUE not null, password text not null, gender varchar (50) not null, jobrole varchar (50) not null, department varchar (50) not null, address text not null, admin boolean not null default false)';
                 client.query(createUserTable)
-                    .then(() => console.log('Done Creating User Table'))
+                    .then(() => console.log('Created User Table'))
                     .catch(() => console.log('Something failed while Creating User Table'));
 
                 // insert Admin User

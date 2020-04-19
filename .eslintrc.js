@@ -7,6 +7,8 @@ module.exports = {
       "no-console": "off"
     },
     "env": {
-      "mocha": true
+      "mocha": true,
+      "es6": true,
+      "node": true
   }
   };
